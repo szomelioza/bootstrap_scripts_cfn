@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  SubnetA:
+    Type: AWS::EC2::Subnet::Id
+  SubnetB:
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+  EfsSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: EFSSG
+      GroupDescription: SG for EFS
+      SecurityGroupIngress:
+        -
+          CidrIp: 0.0.0.0/0
+          FromPort: 2049
+          ToPort: 2049
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - 
+          CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+
+  Efs:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      FileSystemTags:
+        -
+          Key: Name
+          Value: TestEFS
+
+  EfsMountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref Efs
+      SubnetId: !Ref SubnetA
+      SecurityGroups:
+        -
+          !Ref EfsSg
+
+  EfsMountTargetB:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref Efs
+      SubnetId: !Ref SubnetB
+      SecurityGroups:
+        -
+          !Ref EfsSg
